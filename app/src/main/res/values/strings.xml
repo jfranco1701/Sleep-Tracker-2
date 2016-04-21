@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Sleep Tracker</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="nav_title">Sleep Tracker</string>
+
+    <string name="info_frag_header">MetaWear Device Information</string>
+    <string name="status_frag_header">MetaWear Device Status</string>
+
+    <string name="title_connecting">Connecting</string>
+    <string name="message_wait">Please Wait</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="title_error">Error</string>
+    <string name="error_soft_reset">Cannot issue soft reset</string>
+    <string name="error_fragment_bus">must implement the FragmentBus interface</string>
+    <string name="error_unsupported_module">module (sensor) is not supported on this board</string>
+    <string name="error_missing_firmware">Cannot load selected firmware file</string>
+    <string name="label_ok">OK</string>
+    <string name="message_no_config">No configuration options for this panel</string>
+
+
+
+    <string name="title_activity_mwscan">MWScanActivity</string>
+    <string name="title_select_device">Select Device</string>
+
+
+</resources>
