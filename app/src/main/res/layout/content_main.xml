@@ -19,42 +19,29 @@
         android:layout_marginStart="41dp"
         android:textStyle="bold" />
 
-    <TextView
+    <fragment class="com.app.joe.mwsleeptracker.MWStatusFragment"
+        android:id="@+id/status_fragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Selected Device"
-        android:id="@+id/tvSelectedDevice"
-        android:layout_marginTop="20dp"
-        android:layout_below="@+id/tvSelectedLabel"
-        android:layout_alignStart="@+id/tvSelectedLabel" />
+        android:layout_marginTop="40dp"
+        android:layout_alignLeft="@+id/tvSelectedLabel"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchConnection"
+        android:switchMinWidth="60dp"
+        android:layout_alignBottom="@+id/status_fragment"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="40dp"/>
 
     <LinearLayout
         android:id="@+id/infofragment_container"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:layout_marginTop="200dp"
-        android:layout_below="@+id/tvSelectedLabel"
-        android:layout_toStartOf="@+id/tvSelectedLabel" />
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/switchConnection"
-        android:switchMinWidth="75dp"
-        android:layout_alignBottom="@+id/tvStatus"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="39dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/tvStatus"
-        android:layout_below="@+id/tvSelectedDevice"
-        android:layout_alignStart="@+id/tvSelectedDevice" />
+        android:paddingTop="100dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/tvBoardStatus" />
 
 </RelativeLayout>

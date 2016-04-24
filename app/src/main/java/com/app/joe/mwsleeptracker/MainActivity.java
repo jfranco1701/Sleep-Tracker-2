@@ -5,6 +5,8 @@ import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -20,14 +22,23 @@ import android.support.v4.app.FragmentTransaction;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.mbientlab.metawear.AsyncOperation;
+import com.mbientlab.metawear.Message;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
+import com.mbientlab.metawear.RouteManager;
+import com.mbientlab.metawear.UnsupportedModuleException;
+import com.mbientlab.metawear.module.Accelerometer;
+import com.mbientlab.metawear.module.Bma255Accelerometer;
+import com.mbientlab.metawear.module.Bmi160Accelerometer;
+import com.mbientlab.metawear.module.Mma8452qAccelerometer;
 
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, NavigationView.OnNavigationItemSelectedListener  {
@@ -41,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private String deviceMACAddress = "";
     private MetaWearBoard mwBoard;
     private ProgressDialog connectDialog;
+
+    private boolean isAllowDisconnect = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         connectMWBoard();
+
                     } else {
                         disconnectMWBoard();
                     }
@@ -81,45 +95,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
 
-        updateStatus();
-    }
-
-    private void updateStatus(){
-        TextView tvStatus = (TextView) findViewById(R.id.tvStatus);
-
-        if (tvStatus != null) {
-            //Display the current status of the board
-            if (mwBoard != null && mwBoard.isConnected()) {
-                tvStatus.setText(R.string.device_status_connected);
-            } else {
-                tvStatus.setText(R.string.device_status_disconnected);
-            }
-        }
-
-        //Display the currently selected board MAC address
         PrefManager.Init(this);
         deviceMACAddress = PrefManager.readMACAddress();
 
-        TextView tvSelectedDevice = (TextView) findViewById(R.id.tvSelectedDevice);
-
-        if (tvSelectedDevice != null) {
-            if (deviceMACAddress.equals("")) {
-                tvSelectedDevice.setText(R.string.no_device_selected);
-            } else {
-                tvSelectedDevice.setText(deviceMACAddress);
-            }
-        }
+        updateStatusFragment();
     }
 
-
-
-
-
-
-
-
-
-
+    private void updateStatusFragment(){
+        FragmentManager fm = getSupportFragmentManager();
+        MWStatusFragment fragment = (MWStatusFragment) fm.findFragmentById(R.id.status_fragment);
+        fragment.updateStatusInfo(mwBoard, deviceMACAddress);
+    }
 
     private void updateInfoFragment(){
         FragmentManager fm = getSupportFragmentManager();
@@ -186,7 +172,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 //Close the connect dialog
                 connectDialog.dismiss();
 
-                updateStatus();
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        setConnectionSwitch(true);
+                    }
+                });
 
                 //Load the information fragment
                 FragmentManager fm = getSupportFragmentManager();
@@ -195,7 +186,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 ft.add(R.id.infofragment_container, mwInfoFragment, "MWINFOFRAGMENT");
                 ft.commit();
 
-                updateInfoFragment();
+
+                updateStatusFragment();
+//                updateInfoFragment();
+
+                Log.i("MainActivity", "Connected");
+
+                try {
+                    startAccelerometer();
+                } catch (UnsupportedModuleException e) {
+                    unsupportedModule();
+                }
             }
 
             @Override
@@ -204,7 +205,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     connectDialog.dismiss();
                 }
 
-                updateStatus();
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        setConnectionSwitch(false);
+                    }
+                });
+
+                updateStatusFragment();
             }
 
             @Override
@@ -213,14 +221,55 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     connectDialog.dismiss();
                 }
 
-                updateStatus();
+                runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        setConnectionSwitch(false);
+                    }
+                });
+
+                updateStatusFragment();
 
                 mwBoard.connect();
             }
         });
     }
 
+    private void setConnectionSwitch(boolean isChecked){
+        Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
+
+        if(switchConnection != null) {
+            switchConnection.setChecked(isChecked);
+        }
+    }
+
+    private void unsupportedModule() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        alertDialogBuilder.setTitle(R.string.title_error);
+        alertDialogBuilder
+                .setMessage("Unsupported Module")
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    ///<  Taken from: http://stackoverflow.com/a/20742032/4872841
+    protected void enableDisableViewGroup(ViewGroup viewGroup, boolean enabled) {
+        int childCount = viewGroup.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View view = viewGroup.getChildAt(i);
+            view.setEnabled(enabled);
+            if (view instanceof ViewGroup) {
+                enableDisableViewGroup((ViewGroup) view, enabled);
+            }
+        }
+    }
+
     private void connectMWBoard(){
+        //
+        isAllowDisconnect = false;
+
         //Open the connection dialog
         connectDialog = new ProgressDialog(MainActivity.this);
         connectDialog.setTitle(getString(R.string.title_connecting));
@@ -241,20 +290,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void disconnectMWBoard(){
-        mwBoard.setConnectionStateHandler(null);
+        isAllowDisconnect = true;
+
+//        mwBoard.setConnectionStateHandler(null);
         mwBoard.disconnect();
 
-        updateStatus();
+
+        //Remove the information fragment
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("MWINFOFRAGMENT");
+        if(fragment != null){
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-        //Load the information fragment
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        MWInfoFragment mwInfoFragment = new MWInfoFragment();
-        ft.remove(mwInfoFragment);
-        ft.commit();
+
     }
 
     public void retrieveBoard() {
@@ -265,5 +316,48 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         // Create a MetaWear board object for the Bluetooth Device
         mwBoard= serviceBinder.getMetaWearBoard(remoteDevice);
+    }
+
+    private void startAccelerometer() throws UnsupportedModuleException {
+        Log.i("MainActivity", "preparring to starting accel");
+
+        Bmi160Accelerometer bmi160AccModule= mwBoard.getModule(Bmi160Accelerometer.class);
+
+        Log.i("MainActivity", "starting params");
+
+//        bmi160AccModule.enableMotionDetection(Bmi160Accelerometer.MotionType.ANY_MOTION);
+        bmi160AccModule.enableMotionDetection(Bmi160Accelerometer.MotionType.NO_MOTION);
+
+        bmi160AccModule.configureNoMotionDetection()
+                .setDuration(1000)
+                .setThreshold(1.5)
+                .commit();
+
+//        bmi160AccModule.configureAnyMotionDetection()
+//                .setDuration(1)
+//                .setThreshold(2)
+//                .commit();
+
+        Log.i("MainActivity", "Preparing routing");
+
+// Route data from the chip's motion detector
+        bmi160AccModule.routeData().fromMotion().stream("motion").commit()
+                .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+                    @Override
+                    public void success(RouteManager result) {
+                        result.subscribe("motion", new RouteManager.MessageHandler() {
+                            @Override
+                            public void process(Message msg) {
+                                Log.i("MainActivity", msg.toString());
+                            }
+                        });
+                    }
+                });
+
+        // Switch the accelerometer to active mode
+        bmi160AccModule.start();
+
+
+        Log.i("MainActivity", "starting accel");
     }
 }
