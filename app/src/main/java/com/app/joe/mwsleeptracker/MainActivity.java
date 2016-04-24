@@ -21,6 +21,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -51,63 +55,71 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
+
         toggle.syncState();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
-        Button btnConnect = (Button)findViewById(R.id.btnConnect);
-        btnConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                connectMWBoard();
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+        }
+
+        Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
+
+        if (switchConnection != null) {
+            switchConnection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        connectMWBoard();
+                    } else {
+                        disconnectMWBoard();
+                    }
+                }
+            });
+        }
+
+        getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
+
+        updateStatus();
+    }
+
+    private void updateStatus(){
+        TextView tvStatus = (TextView) findViewById(R.id.tvStatus);
+
+        if (tvStatus != null) {
+            //Display the current status of the board
+            if (mwBoard != null && mwBoard.isConnected()) {
+                tvStatus.setText(R.string.device_status_connected);
+            } else {
+                tvStatus.setText(R.string.device_status_disconnected);
             }
-        });
+        }
 
+        //Display the currently selected board MAC address
         PrefManager.Init(this);
+        deviceMACAddress = PrefManager.readMACAddress();
 
-//        deviceMACAddress = PrefManager.readMACAddress();
-        deviceMACAddress = MW_MAC_ADDRESS;
+        TextView tvSelectedDevice = (TextView) findViewById(R.id.tvSelectedDevice);
 
-        if (deviceMACAddress == ""){
-            updateStatusFragment(NO_DEVICE_SELECTED);
-        }
-        else{
-            // Bind the service when the activity is created
-            getApplicationContext().bindService(new Intent(this, MetaWearBleService.class),
-                    this, Context.BIND_AUTO_CREATE);
-
-            updateStatusFragment(0);
-        }
-    }
-
-    private void connectMWBoard(){
-        //Open the connection dialog
-        connectDialog = new ProgressDialog(MainActivity.this);
-        connectDialog.setTitle(getString(R.string.title_connecting));
-        connectDialog.setMessage(getString(R.string.message_wait));
-        connectDialog.setCancelable(false);
-        connectDialog.setCanceledOnTouchOutside(false);
-        connectDialog.setIndeterminate(true);
-        connectDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mwBoard.disconnect();
+        if (tvSelectedDevice != null) {
+            if (deviceMACAddress.equals("")) {
+                tvSelectedDevice.setText(R.string.no_device_selected);
+            } else {
+                tvSelectedDevice.setText(deviceMACAddress);
             }
-        });
-        connectDialog.show();
-
-        //Connect to the MetaWear board
-        mwBoard.connect();
+        }
     }
 
-    private void updateStatusFragment(final int status){
-        //Update the status fragment with the current connection state
 
-                FragmentManager fm = getSupportFragmentManager();
-                MWStatusFragment fragment = (MWStatusFragment) fm.findFragmentById(R.id.mwStatusFragment);
-                fragment.setStatus(status);
 
-    }
+
+
+
+
+
+
+
 
     private void updateInfoFragment(){
         FragmentManager fm = getSupportFragmentManager();
@@ -117,11 +129,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);/**/
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        if(drawer != null){
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -143,7 +158,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+
         return true;
     }
 
@@ -168,8 +186,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 //Close the connect dialog
                 connectDialog.dismiss();
 
-                //Update the status fragment
-                updateStatusFragment(1);
+                updateStatus();
 
                 //Load the information fragment
                 FragmentManager fm = getSupportFragmentManager();
@@ -183,18 +200,51 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
             @Override
             public void disconnected() {
-                //Update the status fragment
-                updateStatusFragment(0);
-                mwBoard.connect();
+                if (connectDialog.isShowing()) {
+                    connectDialog.dismiss();
+                }
+
+                updateStatus();
             }
 
             @Override
             public void failure(int status, Throwable error) {
-                //Update the status fragment
-                updateStatusFragment(0);
+                if (connectDialog.isShowing()) {
+                    connectDialog.dismiss();
+                }
+
+                updateStatus();
+
                 mwBoard.connect();
             }
         });
+    }
+
+    private void connectMWBoard(){
+        //Open the connection dialog
+        connectDialog = new ProgressDialog(MainActivity.this);
+        connectDialog.setTitle(getString(R.string.title_connecting));
+        connectDialog.setMessage(getString(R.string.message_wait));
+        connectDialog.setCancelable(false);
+        connectDialog.setCanceledOnTouchOutside(false);
+        connectDialog.setIndeterminate(true);
+        connectDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mwBoard.disconnect();
+            }
+        });
+        connectDialog.show();
+
+        //Connect to the MetaWear board
+        mwBoard.connect();
+    }
+
+    private void disconnectMWBoard(){
+        mwBoard.setConnectionStateHandler(null);
+        mwBoard.disconnect();
+
+        updateStatus();
     }
 
     @Override
