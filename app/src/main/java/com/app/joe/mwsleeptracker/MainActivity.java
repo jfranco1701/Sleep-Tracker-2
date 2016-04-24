@@ -21,10 +21,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.mbientlab.bletoolbox.scanner.BleScannerFragment;
-import com.mbientlab.bletoolbox.scanner.BleScannerFragment.*;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
 
@@ -67,7 +64,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         });
 
         PrefManager.Init(this);
-        deviceMACAddress = PrefManager.readMACAddress();
+
+//        deviceMACAddress = PrefManager.readMACAddress();
+        deviceMACAddress = MW_MAC_ADDRESS;
 
         if (deviceMACAddress == ""){
             updateStatusFragment(NO_DEVICE_SELECTED);

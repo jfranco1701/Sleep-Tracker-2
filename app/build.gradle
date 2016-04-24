@@ -19,19 +19,27 @@ android {
     }
 }
 
+//repositories {
+//    ivy {
+//        url "http://ivyrep.mbientlab.com"
+//        layout "gradle"
+//    }
+//}
+
 repositories {
-    ivy {
-        url "http://ivyrep.mbientlab.com"
-        layout "gradle"
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.1'
-    compile 'com.android.support:support-v4:23.2.1'
-    compile 'com.android.support:design:23.2.1'
-    compile 'com.mbientlab:metawear:2.5.9'
-    compile 'com.mbientlab.bletoolbox:scanner:0.2.0'
+    compile files('libs/metawear-2.5.9.jar')
+//    compile 'com.mbientlab:metawear:2.5.9'
+    compile 'com.mbientlab.bletoolbox:scanner:0.2.0@aar'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.android.support:design:23.3.0'
 }

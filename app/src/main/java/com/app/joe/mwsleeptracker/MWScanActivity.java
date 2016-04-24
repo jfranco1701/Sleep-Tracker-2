@@ -19,6 +19,7 @@ package com.app.joe.mwsleeptracker;
 
         import java.util.UUID;
 
+
 public class MWScanActivity extends AppCompatActivity implements ScannerCommunicationBus, ServiceConnection {
     private final static UUID[] serviceUuids;
     public static final int REQUEST_START_APP= 1;
@@ -96,3 +97,4 @@ public class MWScanActivity extends AppCompatActivity implements ScannerCommunic
 
 
 }
+

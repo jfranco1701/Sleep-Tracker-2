@@ -35,8 +35,12 @@ public class SettingsActivity extends AppCompatActivity {
         btnSelectDevice.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
+
+
                         Intent intent = new Intent(SettingsActivity.this, MWScanActivity.class);
                         startActivityForResult(intent, 1);
+
+
                     }
                 }
         );
