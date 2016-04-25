@@ -35,6 +35,7 @@ import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
 import com.mbientlab.metawear.RouteManager;
 import com.mbientlab.metawear.UnsupportedModuleException;
+import com.mbientlab.metawear.data.CartesianFloat;
 import com.mbientlab.metawear.module.Accelerometer;
 import com.mbientlab.metawear.module.Bma255Accelerometer;
 import com.mbientlab.metawear.module.Bmi160Accelerometer;
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 
                 updateStatusFragment();
-//                updateInfoFragment();
+                updateInfoFragment();
 
                 Log.i("MainActivity", "Connected");
 
@@ -322,42 +323,33 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Log.i("MainActivity", "preparring to starting accel");
 
         Bmi160Accelerometer bmi160AccModule= mwBoard.getModule(Bmi160Accelerometer.class);
+        bmi160AccModule.setOutputDataRate(2.f);
+        bmi160AccModule.setAxisSamplingRange(3.0f);
 
-        Log.i("MainActivity", "starting params");
 
-//        bmi160AccModule.enableMotionDetection(Bmi160Accelerometer.MotionType.ANY_MOTION);
-        bmi160AccModule.enableMotionDetection(Bmi160Accelerometer.MotionType.NO_MOTION);
-
-        bmi160AccModule.configureNoMotionDetection()
-                .setDuration(1000)
-                .setThreshold(1.5)
-                .commit();
-
-//        bmi160AccModule.configureAnyMotionDetection()
-//                .setDuration(1)
-//                .setThreshold(2)
-//                .commit();
 
         Log.i("MainActivity", "Preparing routing");
 
 // Route data from the chip's motion detector
-        bmi160AccModule.routeData().fromMotion().stream("motion").commit()
+        bmi160AccModule.routeData().fromAxes().stream("motion").commit()
                 .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                     @Override
                     public void success(RouteManager result) {
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
-                                Log.i("MainActivity", msg.toString());
+                                Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }
                         });
                     }
                 });
 
+        bmi160AccModule.enableAxisSampling();
+
         // Switch the accelerometer to active mode
         bmi160AccModule.start();
 
 
-        Log.i("MainActivity", "starting accel");
+        Log.i("MainActivity", " accel started");
     }
 }
