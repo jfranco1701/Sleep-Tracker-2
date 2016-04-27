@@ -2,6 +2,7 @@ package com.app.joe.mwsleeptracker;
 
 import android.app.ProgressDialog;
 import android.content.*;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.Snackbar;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private ProgressDialog connectDialog;
 
     private boolean isAllowDisconnect = false;
+
+    final SleepHistoryDataSource msleepHistoryDataSource = new SleepHistoryDataSource(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,16 +183,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                 });
 
-                //Load the information fragment
-                FragmentManager fm = getSupportFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                MWInfoFragment mwInfoFragment = new MWInfoFragment();
-                ft.add(R.id.infofragment_container, mwInfoFragment, "MWINFOFRAGMENT");
-                ft.commit();
+//                //Load the information fragment
+//                FragmentManager fm = getSupportFragmentManager();
+//                FragmentTransaction ft = fm.beginTransaction();
+//                MWInfoFragment mwInfoFragment = new MWInfoFragment();
+//                ft.add(R.id.infofragment_container, mwInfoFragment, "MWINFOFRAGMENT");
+//                ft.commit();
 
 
                 updateStatusFragment();
-                updateInfoFragment();
+//                updateInfoFragment();
 
                 Log.i("MainActivity", "Connected");
 
@@ -296,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 //        mwBoard.setConnectionStateHandler(null);
         mwBoard.disconnect();
 
+        msleepHistoryDataSource.close();
 
         //Remove the information fragment
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("MWINFOFRAGMENT");
@@ -327,6 +331,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         bmi160AccModule.setAxisSamplingRange(3.0f);
 
 
+        msleepHistoryDataSource.open();
+
+
+
 
         Log.i("MainActivity", "Preparing routing");
 
@@ -338,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
+                                msleepHistoryDataSource.createSleepHistoryEntry(msg.getTimestampAsString(), "1", "2", "3");
                                 Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }
                         });
