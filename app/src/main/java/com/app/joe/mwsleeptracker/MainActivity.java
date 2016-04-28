@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         fragment.updateStatusInfo(mwBoard, deviceMACAddress);
     }
 
+
     private void updateInfoFragment(){
         FragmentManager fm = getSupportFragmentManager();
         MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentByTag("MWINFOFRAGMENT");
