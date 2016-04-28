@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.mbientlab.metawear.AsyncOperation;
@@ -56,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private ProgressDialog connectDialog;
 
     private boolean isAllowDisconnect = false;
-
-    final SleepHistoryDataSource msleepHistoryDataSource = new SleepHistoryDataSource(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +102,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         deviceMACAddress = PrefManager.readMACAddress();
 
         updateStatusFragment();
+
+        DBHandler dbhandler = new DBHandler(MainActivity.this);
+        int test = dbhandler.getShopsCount();
+
+        Toast.makeText(MainActivity.this, String.valueOf(test), Toast.LENGTH_LONG).show();
     }
 
     private void updateStatusFragment(){
@@ -299,8 +303,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 //        mwBoard.setConnectionStateHandler(null);
         mwBoard.disconnect();
 
-        msleepHistoryDataSource.close();
-
         //Remove the information fragment
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("MWINFOFRAGMENT");
         if(fragment != null){
@@ -330,12 +332,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         bmi160AccModule.setOutputDataRate(2.f);
         bmi160AccModule.setAxisSamplingRange(3.0f);
 
-
-        msleepHistoryDataSource.open();
-
-
-
-
         Log.i("MainActivity", "Preparing routing");
 
 // Route data from the chip's motion detector
@@ -346,7 +342,15 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
-                                msleepHistoryDataSource.createSleepHistoryEntry(msg.getTimestampAsString(), "1", "2", "3");
+                                AccelEntry accelentry = new AccelEntry();
+                                accelentry.setLogDateTime(msg.getTimestampAsString());
+                                accelentry.setXValue(msg.getData(CartesianFloat.class).x().toString());
+                                accelentry.setYValue(msg.getData(CartesianFloat.class).y().toString());
+                                accelentry.setZValue(msg.getData(CartesianFloat.class).z().toString());
+
+                                DBHandler dbhandler = new DBHandler(MainActivity.this);
+                                dbhandler.addSleepHistory(accelentry);
+
                                 Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }
                         });
