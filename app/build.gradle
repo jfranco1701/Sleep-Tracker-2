@@ -37,9 +37,11 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile files('libs/metawear-2.5.9.jar')
-//    compile 'com.mbientlab:metawear:2.5.9'
     compile 'com.mbientlab.bletoolbox:scanner:0.2.0@aar'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:support-v4:23.3.0'
     compile 'com.android.support:design:23.3.0'
+    compile 'com.androidplot:androidplot-core:0.9.6'
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
+
 }

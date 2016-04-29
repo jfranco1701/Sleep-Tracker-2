@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         updateStatusFragment();
 
         DBHandler dbhandler = new DBHandler(MainActivity.this);
-        int test = dbhandler.getShopsCount();
+        int test = dbhandler.getRecordCount();
 
         Toast.makeText(MainActivity.this, String.valueOf(test), Toast.LENGTH_LONG).show();
     }
@@ -144,7 +144,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         int id = item.getItemId();
 
         if (id == R.id.nav_view_history) {
-
+            intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_settings) {
             intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
@@ -343,14 +344,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
-                                AccelEntry accelentry = new AccelEntry();
-                                accelentry.setLogDateTime(msg.getTimestampAsString());
-                                accelentry.setXValue(msg.getData(CartesianFloat.class).x().toString());
-                                accelentry.setYValue(msg.getData(CartesianFloat.class).y().toString());
-                                accelentry.setZValue(msg.getData(CartesianFloat.class).z().toString());
+                                SleepEntry sleepEntry = new SleepEntry();
+                                sleepEntry.setLogDateTime(msg.getTimestampAsString());
+                                sleepEntry.setSleepState("ASLEEP");
 
                                 DBHandler dbhandler = new DBHandler(MainActivity.this);
-                                dbhandler.addSleepHistory(accelentry);
+                                dbhandler.addSleepHistory(sleepEntry);
 
                                 Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }
