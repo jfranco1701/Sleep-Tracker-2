@@ -49,7 +49,7 @@
         android:layout_height="300dp"
         android:layout_marginTop="70dp"
         android:layout_alignTop="@+id/imageButton"
-        ap:label="A Simple XY Plot"
+        ap:label="Sleep Tracker Sleep Log"
         ap:rangeLabel="range"
         ap:domainLabel="domain"
         ap:borderColor="#000000"
