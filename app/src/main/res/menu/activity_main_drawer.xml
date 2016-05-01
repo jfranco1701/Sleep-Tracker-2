@@ -5,7 +5,7 @@
         <item
             android:id="@+id/nav_view_history"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="View Sleep History" />
+            android:title="View Sleep Tracking Log" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_slideshow"

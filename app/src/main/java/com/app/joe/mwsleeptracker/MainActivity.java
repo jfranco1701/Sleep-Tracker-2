@@ -147,13 +147,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         int id = item.getItemId();
 
         if (id == R.id.nav_view_history) {
-            intent = new Intent(MainActivity.this, HistoryActivity.class);
+            intent = new Intent(MainActivity.this, SleepLogActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_settings) {
-            intent = new Intent(MainActivity.this, SettingsActivity.class);
+            intent = new Intent(MainActivity.this, AppSettingsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_about) {
-
+            intent = new Intent(MainActivity.this, AboutActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
