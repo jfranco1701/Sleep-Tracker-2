@@ -43,6 +43,9 @@ import com.mbientlab.metawear.module.Bma255Accelerometer;
 import com.mbientlab.metawear.module.Bmi160Accelerometer;
 import com.mbientlab.metawear.module.Mma8452qAccelerometer;
 
+import java.util.Calendar;
+import java.util.Date;
+
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, NavigationView.OnNavigationItemSelectedListener  {
     private static final int PREFERENCE_MODE_PRIVATE = 0;
@@ -328,13 +331,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void startAccelerometer() throws UnsupportedModuleException {
-        Log.i("MainActivity", "preparring to starting accel");
-
         Bmi160Accelerometer bmi160AccModule= mwBoard.getModule(Bmi160Accelerometer.class);
         bmi160AccModule.setOutputDataRate(2.f);
         bmi160AccModule.setAxisSamplingRange(3.0f);
-
-        Log.i("MainActivity", "Preparing routing");
 
 // Route data from the chip's motion detector
         bmi160AccModule.routeData().fromAxes().stream("motion").commit()
@@ -345,8 +344,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             @Override
                             public void process(Message msg) {
                                 SleepEntry sleepEntry = new SleepEntry();
-                                sleepEntry.setLogDateTime(msg.getTimestampAsString());
-                                sleepEntry.setSleepState("ASLEEP");
+
+                                sleepEntry.setLogDateTime(msg.getTimestamp());
+                                sleepEntry.setSleepState(10);
 
                                 DBHandler dbhandler = new DBHandler(MainActivity.this);
                                 dbhandler.addSleepHistory(sleepEntry);
@@ -361,8 +361,5 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         // Switch the accelerometer to active mode
         bmi160AccModule.start();
-
-
-        Log.i("MainActivity", " accel started");
     }
 }

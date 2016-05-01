@@ -43,43 +43,13 @@
         android:layout_alignTop="@+id/imageButton"
         android:layout_alignParentStart="true" />
 
-    <com.androidplot.xy.XYPlot
-        android:id="@+id/plot"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/chart"
         android:layout_width="fill_parent"
-        android:layout_height="300dp"
+        android:layout_height="350dp"
         android:layout_marginTop="70dp"
         android:layout_alignTop="@+id/imageButton"
-        ap:label="Sleep Tracker Sleep Log"
-        ap:rangeLabel="range"
-        ap:domainLabel="domain"
-        ap:borderColor="#000000"
-        ap:backgroundColor="#000000"
-        ap:graphBackgroundColor="#000000"
-        ap:gridBackgroundColor="#111111"
-        ap:gridPaddingLeft="20dp"
-        ap:gridPaddingRight="20dp"
-        ap:gridPaddingTop="20dp"
-        ap:gridPaddingBottom="20dp"
-        ap:labelTextSize="20sp"
-        ap:rangeLabelTextSize="13sp"
-        ap:domainLabelTextSize="13sp"
-        ap:graphMarginTop="20dp"
-        ap:graphMarginBottom="40dp"
-        ap:graphMarginLeft="15dp"
-        ap:graphMarginRight="10dp"
-        ap:graphDomainLineColor="#FFFFFF"
-        ap:graphDomainLineThickness="1dp"
-        ap:graphRangeLineColor="#FFFFFF"
-        ap:graphRangeLineThickness="1dp"
-        ap:rangeTickLabelTextSize="15sp"
-        ap:rangeOriginTickLabelTextSize="15sp"
-        ap:domainTickLabelTextSize="15sp"
-        ap:domainOriginTickLabelTextSize="15sp"
-        ap:legendTextSize="15sp"
-        ap:legendIconHeight="15dp"
-        ap:legendIconWidth="15dp"
-        ap:legendHeight="25dp"
-        ap:legendAnchorPosition="right_bottom" />
-
-
+        android:gravity="center"
+        android:orientation="vertical" >
+    </LinearLayout>
 </RelativeLayout>

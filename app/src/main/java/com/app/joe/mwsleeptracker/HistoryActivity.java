@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.androidplot.Plot;
@@ -18,18 +19,41 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
-import android.graphics.DashPathEffect;
+/*import android.graphics.DashPathEffect;
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYSeries;
-import com.androidplot.xy.*;
+import com.androidplot.xy.*;*/
+
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.chart.BarChart;
+import org.achartengine.chart.BarChart.Type;
+import org.achartengine.chart.RangeBarChart;
+import org.achartengine.model.TimeSeries;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYMultipleSeriesRenderer.Orientation;
+import org.achartengine.renderer.XYSeriesRenderer;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -39,7 +63,7 @@ public class HistoryActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
-    private XYPlot plot;
+//    private XYPlot plot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +81,8 @@ public class HistoryActivity extends AppCompatActivity {
         String formattedDate = df.format(date);
         tvDate.setText(formattedDate);
 
+
+
         generateGraph();
 
 
@@ -67,103 +93,130 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void generateGraph(){
-        plot = (XYPlot) findViewById(R.id.plot);
+        String DATE_FORMAT2 = "yyyyMMddHHmmss";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT2);
+        Calendar calenderStart = Calendar.getInstance();
+        Calendar calenderEnd = Calendar.getInstance();
 
-        Number[] sleep = {0, 5, 10, 5, 10, 0, 5, 10, 10, 10, 0};
-        Number[] times = {22.5, 22.7, 23, 23.7, 24.4, 24.7, 25.5, 26.4, 27.7, 28.7, 29.2};
+        try{
+            String start = "20160429180000";
+            String end = "20160430180000";
 
-        XYSeries series2 = new SimpleXYSeries(
-                Arrays.asList(times),
-                Arrays.asList(sleep),
-                "Sleep Quality");
-
-        LineAndPointFormatter series1Format = new LineAndPointFormatter();
-        series1Format.setPointLabelFormatter(new PointLabelFormatter());
-        series1Format.configure(getApplicationContext(), R.xml.line_point_formatter_with_labels);
-
-//        series1Format.setInterpolationParams(
-//                new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
-
-        series1Format.setPointLabelFormatter(null);
-
-        plot.addSeries(series2, series1Format);
-
-        plot.setRangeStep(XYStepMode.INCREMENT_BY_VAL, 1);
-        plot.setDomainStep(XYStepMode.INCREMENT_BY_VAL,.5);
-        plot.setTicksPerRangeLabel(5);
-        plot.setTicksPerDomainLabel(4);
-        plot.setDomainLabel("");
-        plot.setRangeLabel("");
-
-        plot.setDomainValueFormat(new Format() {
-            @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                Number num = (Number) obj;
-
-                String time = "";
-                int hour = (int)Math.floor((double)num);
-                if (hour >= 24){
-                    hour = hour - 24;
-                }
-
-                double min = (double)num - hour;
-
-                time = Integer.toString(hour);
-                if (hour < 10){
-                    time = "0" + time;
-                }
-
-                if (min == .0){
-                    time = time + ":00         ";
-                }
-                else{
-                    time = time + ":30         ";
-                }
-
-                toAppendTo.append(time);
-
-                return toAppendTo;
-            }
-
-            @Override
-            public Object parseObject(String source, ParsePosition pos) {
-                return null;
-            }
-        });
+            Date startDate = dateFormat.parse(start);
+            Date endDate = dateFormat.parse(end);
 
 
-        // create a custom getFormatter to draw our state names as range tick labels:
-        plot.setRangeValueFormat(new Format() {
-            @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                Number num = (Number) obj;
-                switch(num.intValue()) {
-                    case 10:
-                        toAppendTo.append("Aslp   ");
-                        break;
-                    case 5:
-                        toAppendTo.append("Rstls   ");
-                        break;
-                    case 0:
-                        toAppendTo.append("Awk   ");
-                        break;
-                    default:
-                        toAppendTo.append("Unk   ");
-                        break;
-                }
-                return toAppendTo;
-            }
+            calenderStart.setTime(startDate);
 
-            @Override
-            public Object parseObject(String source, ParsePosition pos) {
-                return null;
-            }
-        });
+
+            calenderEnd.setTime(endDate);
+        }
+        catch (ParseException e){
+
+        }
+
+        Number[] sleep;
+        Number[] times;
+
+        DBHandler dbHandler = new DBHandler(HistoryActivity.this);
+        SleepLog sleepLog = dbHandler.getSleepLog(Long.parseLong(dateFormat.format(calenderStart.getTime())),
+                Long.parseLong(dateFormat.format(calenderEnd.getTime())));
+
+        sleep = sleepLog.getSleepStatus();
+        times = sleepLog.getSleepTime();
+
+        int[] margins = {100, 150, 100, 25};
+
+        GraphicalView mChart;
 
 
 
-        // rotate domain labels 45 degrees to make them more compact horizontally:
-        plot.getGraphWidget().setDomainLabelOrientation(-45);
+
+        TimeSeries sleepQual = new TimeSeries("sleepQual");
+        Date[] dt = new Date[7];
+
+        Calendar calendar = new GregorianCalendar(2016, 3, 30, 22, 10, 0);
+        Calendar calendar2 = new GregorianCalendar(2016, 3, 30, 22, 30, 0);
+        Calendar calendar3 = new GregorianCalendar(2016, 3, 30, 22, 30, 0);
+        Calendar calendar4 = new GregorianCalendar(2016, 3, 30, 22, 50, 0);
+        Calendar calendar5 = new GregorianCalendar(2016, 3, 30, 22, 50, 0);
+        Calendar calendar6 = new GregorianCalendar(2016, 4, 1, 2, 30, 0);
+        Calendar calendar7 = new GregorianCalendar(2016, 4, 1, 2, 30, 0);
+
+        dt[0] = calendar.getTime();
+        dt[1] = calendar2.getTime();
+        dt[2] = calendar3.getTime();
+        dt[3] = calendar4.getTime();
+        dt[4] = calendar5.getTime();
+        dt[5] = calendar6.getTime();
+        dt[6] = calendar7.getTime();
+
+        int[] quality = new int[7];
+        quality[0] = 0;
+        quality[1] = 0;
+        quality[2] = 5;
+        quality[3] = 5;
+        quality[4] = 10;
+        quality[5] = 10;
+        quality[6] = 0;
+
+
+        for(int i=0; i<dt.length;i++){
+            sleepQual.add(dt[i], quality[i]);
+        }
+
+        XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+        mDataset.addSeries(sleepQual);
+
+        XYSeriesRenderer mSleepRenderer = new XYSeriesRenderer();
+        mSleepRenderer.setColor(Color.GREEN);
+
+        XYSeriesRenderer.FillOutsideLine fill = new XYSeriesRenderer.FillOutsideLine(XYSeriesRenderer.FillOutsideLine.Type.BOUNDS_ABOVE);
+        fill.setColor(Color.GREEN);
+        mSleepRenderer.addFillOutsideLine(fill);
+
+        XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
+
+        mRenderer.addSeriesRenderer(mSleepRenderer);
+        mRenderer.setLegendTextSize(48f);
+        mRenderer.setFitLegend(true);
+
+        mRenderer.setYLabels(3);
+        mRenderer.setXLabels(4);
+        mRenderer.setYAxisMin(0);
+        mRenderer.setYAxisMax(10);
+//        mRenderer.setXAxisMin(22.1);
+//        mRenderer.setPanLimits(new double[]{22,40,0,0});
+
+        mRenderer.setMargins(margins);
+        mRenderer.setYLabelsPadding(80f);
+        mRenderer.setLabelsTextSize(48f);
+
+        mRenderer.addYTextLabel(0, "AWK");
+        mRenderer.addYTextLabel(5, "RST");
+        mRenderer.addYTextLabel(10, "ASLP");
+
+        mRenderer.setPanEnabled(true,false);
+        mRenderer.setZoomEnabled(false, false);
+        mRenderer.setChartTitle("");
+        mRenderer.setYTitle("");
+        mRenderer.setXTitle("");
+        mRenderer.setGridColor(Color.WHITE);
+        mRenderer.setBackgroundColor(Color.BLACK);
+        mRenderer.setApplyBackgroundColor(true);
+        mRenderer.setShowGrid(true);
+
+//        mRenderer.setBarWidth(10f);
+
+
+
+
+
+
+        mChart = ChartFactory.getTimeChartView(this, mDataset, mRenderer, "HH:mm");
+
+        LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
+        layout.addView(mChart);
 
     }
 
