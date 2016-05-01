@@ -1,5 +1,7 @@
 package com.app.joe.mwsleeptracker;
 
+import java.util.Date;
+
 /**
  * Created by jfran on 4/30/2016.
  */
@@ -7,8 +9,8 @@ public class SleepLog {
     private int totalAwake;
     private int totalRestless;
     private int totalAsleep;
-    private Number[] sleepStatus;
-    private Number[] sleepTime;
+    private int[] sleepStatus;
+    private Date[] sleepDate;
 
     public int getTotalAwake() { return this.totalAwake; }
     public void setTotalAwake(int totalAwake) {this.totalAwake = totalAwake; }
@@ -19,9 +21,9 @@ public class SleepLog {
     public int getTotalAsleep() { return this.totalAsleep; }
     public void setTotalAsleep(int totalAsleep) { this.totalAsleep = totalAsleep; }
 
-    public Number[] getSleepStatus() { return this.sleepStatus; }
-    public void setSleepStatus(Number[] sleepStatus) { this.sleepStatus = sleepStatus; }
+    public int[] getSleepStatus() { return this.sleepStatus; }
+    public void setSleepStatus(int[] sleepStatus) { this.sleepStatus = sleepStatus; }
 
-    public Number[] getSleepTime() { return this.sleepTime; }
-    public void setSleepTime(Number[] sleepTime) { this.sleepTime = sleepTime; }
+    public Date[] getSleepDate() { return this.sleepDate; }
+    public void setSleepDate(Date[] sleepDate) { this.sleepDate = sleepDate; }
 }

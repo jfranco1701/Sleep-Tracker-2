@@ -45,6 +45,7 @@ import com.mbientlab.metawear.module.Mma8452qAccelerometer;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, NavigationView.OnNavigationItemSelectedListener  {
@@ -346,7 +347,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             public void process(Message msg) {
                                 SleepEntry sleepEntry = new SleepEntry();
 
-                                sleepEntry.setLogDateTime(msg.getTimestamp());
+                                Calendar calendar = msg.getTimestamp();
+                                sleepEntry.setLogDateTime(calendar.getTimeInMillis());
+
+
+
                                 sleepEntry.setSleepState(10);
 
                                 DBHandler dbhandler = new DBHandler(MainActivity.this);

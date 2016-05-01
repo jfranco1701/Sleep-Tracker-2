@@ -6,6 +6,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,154 +36,150 @@ public class SleepLogActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //Set the date to the current date
         TextView tvDate = (TextView) findViewById(R.id.tvDate);
         Date date = new Date();
-
         SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
         String formattedDate = df.format(date);
         tvDate.setText(formattedDate);
 
+        tvDate.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                generateGraph();
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+            }
+        });
+
         generateGraph();
     }
+
     private void generateGraph(){
-        String DATE_FORMAT2 = "yyyyMMddHHmmss";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT2);
-        Calendar calenderStart = Calendar.getInstance();
-        Calendar calenderEnd = Calendar.getInstance();
+        //Generate the graph of the sleep data for the selected date
+        Calendar calendarStart = null;
+        Calendar calendarEnd = null;
+
+        //Get date from the text view
+        SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy HH:mm");
+
+        TextView tvDate = (TextView)findViewById(R.id.tvDate);
+        String searchDateString = tvDate.getText().toString()+ " 23:59";
 
         try{
-            String start = "20160429180000";
-            String end = "20160430180000";
+            //Create the start and end dates for the search
+            Date searchDate = (Date)df.parse(searchDateString);
 
-            Date startDate = dateFormat.parse(start);
-            Date endDate = dateFormat.parse(end);
+            calendarStart = Calendar.getInstance();
+            calendarStart.setTime(searchDate);
+            calendarStart.add(Calendar.HOUR_OF_DAY, -12);
 
-
-            calenderStart.setTime(startDate);
-
-
-            calenderEnd.setTime(endDate);
+            calendarEnd = Calendar.getInstance();
+            calendarEnd.setTime(searchDate);
+            calendarEnd.add(Calendar.HOUR_OF_DAY, 12);
         }
         catch (ParseException e){
 
         }
 
-        Number[] sleep;
-        Number[] times;
+        if (calendarStart != null && calendarEnd != null){
+            int[] sleepStatus = null;
+            Date[] sleepDate = null;
 
-        DBHandler dbHandler = new DBHandler(SleepLogActivity.this);
-        SleepLog sleepLog = dbHandler.getSleepLog(Long.parseLong(dateFormat.format(calenderStart.getTime())),
-                Long.parseLong(dateFormat.format(calenderEnd.getTime())));
+            DBHandler dbHandler = new DBHandler(SleepLogActivity.this);
+            SleepLog sleepLog = dbHandler.getSleepLog(calendarStart.getTimeInMillis(),
+                    calendarEnd.getTimeInMillis());
 
-        sleep = sleepLog.getSleepStatus();
-        times = sleepLog.getSleepTime();
+            sleepStatus = sleepLog.getSleepStatus();
+            sleepDate = sleepLog.getSleepDate();
 
-        int[] margins = {100, 150, 100, 25};
+            if (sleepStatus == null || sleepStatus.length < 1){
+                TextView tvTotalAsleep = (TextView)findViewById(R.id.tvTotalSleep);
+                tvTotalAsleep.setText("There is no log data for the date selected");
 
-        GraphicalView mChart;
+                TextView tvTotalAwake = (TextView)findViewById(R.id.tvTotalAwake);
+                tvTotalAwake.setVisibility(View.GONE);
 
+                TextView tvTotalRestless = (TextView)findViewById(R.id.tvTotalRestless);
+                tvTotalRestless.setVisibility(View.GONE);
 
+                LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
+                layout.setVisibility(View.GONE);
+            }
+            else
+            {
 
+                int[] margins = {100, 150, 100, 25};
 
-        TimeSeries sleepQual = new TimeSeries("sleepQual");
-        Date[] dt = new Date[7];
+                GraphicalView mChart;
+                TimeSeries tsSleepQual = new TimeSeries("Sleep Quality");
 
-        Calendar calendar = new GregorianCalendar(2016, 3, 30, 22, 10, 0);
-        Calendar calendar2 = new GregorianCalendar(2016, 3, 30, 22, 30, 0);
-        Calendar calendar3 = new GregorianCalendar(2016, 3, 30, 22, 30, 0);
-        Calendar calendar4 = new GregorianCalendar(2016, 3, 30, 22, 50, 0);
-        Calendar calendar5 = new GregorianCalendar(2016, 3, 30, 22, 50, 0);
-        Calendar calendar6 = new GregorianCalendar(2016, 4, 1, 2, 30, 0);
-        Calendar calendar7 = new GregorianCalendar(2016, 4, 1, 2, 30, 0);
+                for(int i=0; i<sleepDate.length;i++){
+                    tsSleepQual.add(sleepDate[i], sleepStatus[i]);
+                }
 
-        dt[0] = calendar.getTime();
-        dt[1] = calendar2.getTime();
-        dt[2] = calendar3.getTime();
-        dt[3] = calendar4.getTime();
-        dt[4] = calendar5.getTime();
-        dt[5] = calendar6.getTime();
-        dt[6] = calendar7.getTime();
+                XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+                mDataset.addSeries(tsSleepQual);
 
-        int[] quality = new int[7];
-        quality[0] = 0;
-        quality[1] = 0;
-        quality[2] = 5;
-        quality[3] = 5;
-        quality[4] = 10;
-        quality[5] = 10;
-        quality[6] = 0;
+                XYSeriesRenderer mSleepRenderer = new XYSeriesRenderer();
+                mSleepRenderer.setColor(Color.GREEN);
 
+                XYSeriesRenderer.FillOutsideLine fill = new XYSeriesRenderer.FillOutsideLine(XYSeriesRenderer.FillOutsideLine.Type.BOUNDS_ABOVE);
+                fill.setColor(Color.GREEN);
+                mSleepRenderer.addFillOutsideLine(fill);
 
-        for(int i=0; i<dt.length;i++){
-            sleepQual.add(dt[i], quality[i]);
+                XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
+
+                mRenderer.addSeriesRenderer(mSleepRenderer);
+                mRenderer.setLegendTextSize(48f);
+                mRenderer.setFitLegend(true);
+
+                mRenderer.setYLabels(3);
+                mRenderer.setXLabels(4);
+                mRenderer.setYAxisMin(0);
+                mRenderer.setYAxisMax(10);
+
+                mRenderer.setMargins(margins);
+                mRenderer.setYLabelsPadding(80f);
+                mRenderer.setLabelsTextSize(48f);
+
+                mRenderer.addYTextLabel(0, "AWK");
+                mRenderer.addYTextLabel(5, "RST");
+                mRenderer.addYTextLabel(10, "ASLP");
+
+                mRenderer.setPanEnabled(true,false);
+                mRenderer.setZoomEnabled(false, false);
+                mRenderer.setChartTitle("");
+                mRenderer.setYTitle("");
+                mRenderer.setXTitle("");
+                mRenderer.setGridColor(Color.WHITE);
+                mRenderer.setBackgroundColor(Color.BLACK);
+                mRenderer.setApplyBackgroundColor(true);
+                mRenderer.setShowGrid(true);
+
+                mChart = ChartFactory.getTimeChartView(this, mDataset, mRenderer, "MM-dd HH:mm");
+
+                LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
+                layout.addView(mChart);
+                layout.setVisibility(View.VISIBLE);
+
+                TextView tvTotalAwake = (TextView)findViewById(R.id.tvTotalAwake);
+                tvTotalAwake.setText("Total Time Awake: " + sleepLog.getTotalAwake());
+                tvTotalAwake.setVisibility(View.VISIBLE);
+
+                TextView tvTotalSleep = (TextView)findViewById(R.id.tvTotalSleep);
+                tvTotalSleep.setText("Total Time Asleep: " + sleepLog.getTotalAsleep());
+                tvTotalSleep.setVisibility(View.VISIBLE);
+
+                TextView tvTotalRestless = (TextView)findViewById(R.id.tvTotalRestless);
+                tvTotalRestless.setText("Total Time Restless: " + sleepLog.getTotalRestless());
+                tvTotalRestless.setVisibility(View.VISIBLE);
+            }
         }
-
-        XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
-        mDataset.addSeries(sleepQual);
-
-        XYSeriesRenderer mSleepRenderer = new XYSeriesRenderer();
-        mSleepRenderer.setColor(Color.GREEN);
-
-        XYSeriesRenderer.FillOutsideLine fill = new XYSeriesRenderer.FillOutsideLine(XYSeriesRenderer.FillOutsideLine.Type.BOUNDS_ABOVE);
-        fill.setColor(Color.GREEN);
-        mSleepRenderer.addFillOutsideLine(fill);
-
-        XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
-
-        mRenderer.addSeriesRenderer(mSleepRenderer);
-        mRenderer.setLegendTextSize(48f);
-        mRenderer.setFitLegend(true);
-
-        mRenderer.setYLabels(3);
-        mRenderer.setXLabels(4);
-        mRenderer.setYAxisMin(0);
-        mRenderer.setYAxisMax(10);
-//        mRenderer.setXAxisMin(22.1);
-//        mRenderer.setPanLimits(new double[]{22,40,0,0});
-
-        mRenderer.setMargins(margins);
-        mRenderer.setYLabelsPadding(80f);
-        mRenderer.setLabelsTextSize(48f);
-
-        mRenderer.addYTextLabel(0, "AWK");
-        mRenderer.addYTextLabel(5, "RST");
-        mRenderer.addYTextLabel(10, "ASLP");
-
-        mRenderer.setPanEnabled(true,false);
-        mRenderer.setZoomEnabled(false, false);
-        mRenderer.setChartTitle("");
-        mRenderer.setYTitle("");
-        mRenderer.setXTitle("");
-        mRenderer.setGridColor(Color.WHITE);
-        mRenderer.setBackgroundColor(Color.BLACK);
-        mRenderer.setApplyBackgroundColor(true);
-        mRenderer.setShowGrid(true);
-
-//        mRenderer.setBarWidth(10f);
-
-
-
-
-
-
-        mChart = ChartFactory.getTimeChartView(this, mDataset, mRenderer, "HH:mm");
-
-        LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
-        layout.addView(mChart);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

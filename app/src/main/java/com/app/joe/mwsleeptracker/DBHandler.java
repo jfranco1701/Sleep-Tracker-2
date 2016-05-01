@@ -15,7 +15,7 @@ import java.util.GregorianCalendar;
  * Created by jfran on 4/27/2016.
  */
 public class DBHandler extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 9;
     private static final String DATABASE_NAME = "SleepHistory";
     private static final String TABLE_NAME = "sleephistory";
     private static final String COLUMN_NAME_ID = "id";
@@ -38,7 +38,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME + "("
                 + COLUMN_NAME_ID + " INTEGER PRIMARY KEY,"
-                + COLUMN_NAME_LOGDATETIME + " INTEGER,"
+                + COLUMN_NAME_LOGDATETIME + " LONG,"
                 + COLUMN_NAME_SLEEPSTATE + " INTEGER)";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
@@ -53,7 +53,8 @@ public class DBHandler extends SQLiteOpenHelper {
     public void addSleepHistory(SleepEntry sleepEntry) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_LOGDATETIME, Long.parseLong(dateFormat.format(sleepEntry.getLogDateTime().getTime())));
+//        values.put(COLUMN_NAME_LOGDATETIME, Long.parseLong(dateFormat.format(sleepEntry.getLogDateTime().getTime())));
+        values.put(COLUMN_NAME_LOGDATETIME, sleepEntry.getLogDateTime());
         values.put(COLUMN_NAME_SLEEPSTATE, sleepEntry.getSleepState());
         db.insert(TABLE_NAME, null, values);
         db.close();
@@ -71,8 +72,8 @@ public class DBHandler extends SQLiteOpenHelper {
 
     public SleepLog getSleepLog(long startDateTime, long endDateTime){
         SleepLog sleepLog = new SleepLog();
-        Number[] sleepState = null;
-        Number[] sleepTime = null;
+        int[] sleepState = null;
+        Date[] sleepDate = null;
 
         String logQuery = "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + COLUMN_NAME_LOGDATETIME + " >= " + startDateTime + " AND " +
@@ -82,35 +83,38 @@ public class DBHandler extends SQLiteOpenHelper {
         int count = cursor.getCount();
 
         if (count > 0){
-            sleepState = new Number[count+2];
-            sleepTime = new Number[count+2];
+            sleepState = new int[count*2 - 1];
+            sleepDate = new Date[count*2 - 1];
 
-            int x = 1;
+            int x = 0;
 
             cursor.moveToFirst();
 
             do{
+                //Get sleep state
                 sleepState[x] = cursor.getInt(cursor.getColumnIndex(COLUMN_NAME_SLEEPSTATE));
 
-                int datetime = cursor.getInt(cursor.getColumnIndex(COLUMN_NAME_LOGDATETIME));
+                //Get date time integer and convert it back to a date
+                long datetime = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_LOGDATETIME));
+                Calendar calendar = new GregorianCalendar();
+                calendar.setTimeInMillis(datetime);
 
-                Date d = new Date(datetime);
-                Calendar cal = new GregorianCalendar();
-                cal.setTime(d);
+                sleepDate[x] = calendar.getTime();
 
-                double time = cal.get(Calendar.HOUR);
-                time = time + ((double)cal.get(Calendar.MINUTE) / 60);
-                sleepTime[x] = time;
-                x++;
+                if (x > 0){
+                    sleepState[x-1] = sleepState[x];
+                    sleepDate[x-1] = sleepDate[x-2];
+                }
+
+                x+=2;
             } while (cursor.moveToNext());
 
-            sleepState[0] = AWAKE;
-            sleepState[count] = AWAKE;
-            sleepTime[0] = sleepTime[1].intValue() -0.01;
-            sleepTime[count] = sleepTime[count-1].intValue() + 0.01;
-
             sleepLog.setSleepStatus(sleepState);
-            sleepLog.setSleepTime(sleepTime);
+            sleepLog.setSleepDate(sleepDate);
+
+            sleepLog.setTotalAsleep(0);
+            sleepLog.setTotalAwake(0);
+            sleepLog.setTotalRestless(0);
         }
 
         cursor.close();

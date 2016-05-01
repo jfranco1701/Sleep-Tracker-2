@@ -9,7 +9,7 @@ import java.util.Calendar;
  */
 public class SleepEntry {
     private long id;
-    private Calendar logdatetime;
+    private long logdatetime;
     private int sleepState;
 
     public long getId() {
@@ -20,11 +20,11 @@ public class SleepEntry {
         this.id = id;
     }
 
-    public Calendar getLogDateTime() {
+    public long getLogDateTime() {
         return logdatetime;
     }
 
-    public void setLogDateTime(Calendar logdatetime){
+    public void setLogDateTime(long logdatetime){
         this.logdatetime = logdatetime;
     }
 
