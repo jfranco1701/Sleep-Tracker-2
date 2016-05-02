@@ -123,10 +123,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
 
-    private void updateInfoFragment(){
+    private void updateInfoFragment(float X, float Y, float Z){
         FragmentManager fm = getSupportFragmentManager();
         MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
-        fragment.updateDeviceInfo(mwBoard);
+        fragment.updateDeviceInfo(X, Y, Z);
     }
 
     @Override
@@ -200,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 showInfoFragment();
 
                 updateStatusFragment();
-                updateInfoFragment();
 
                 Log.i("MainActivity", "Connected");
 
@@ -362,6 +361,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
+
+                                updateInfoFragment(msg.getData(CartesianFloat.class).x(),
+                                        msg.getData(CartesianFloat.class).y(),
+                                        msg.getData(CartesianFloat.class).z());
 
                                 //LOGING WOULD BE HERE
 

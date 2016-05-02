@@ -18,49 +18,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Battery Level"
-        android:id="@+id/tvInfoBLLabel"
-        android:layout_below="@+id/tvHeader"
-        android:layout_marginTop="20dp"
-        android:layout_alignStart="@+id/tvHeader" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/tvInfoBattery"
-        android:layout_alignTop="@+id/tvInfoBLLabel"
-        android:layout_alignStart="@+id/tvInfoSignal" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="RRSI"
-        android:id="@+id/tvInfoSignalLabel"
-        android:layout_below="@+id/tvInfoBLLabel"
-        android:layout_alignStart="@+id/tvInfoBLLabel"
-        android:layout_marginTop="10dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/tvInfoSignal"
-        android:layout_alignTop="@+id/tvInfoSignalLabel"
-        android:layout_alignEnd="@+id/tvHeader" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="X: "
         android:id="@+id/tvInfoAccelXLabel"
         android:layout_marginTop="15dp"
-        android:layout_below="@+id/tvInfoSignalLabel"
-        android:layout_alignStart="@+id/tvInfoSignalLabel" />
+        android:layout_below="@+id/tvHeader"
+        android:layout_alignStart="@+id/tvHeader" />
 
     <TextView
         android:layout_width="wrap_content"

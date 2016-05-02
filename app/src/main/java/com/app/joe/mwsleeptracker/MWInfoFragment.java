@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.MetaWearBoard;
 
 
@@ -29,29 +30,20 @@ public class MWInfoFragment extends Fragment {
 
     }
 
-    public void updateDeviceInfo(final MetaWearBoard mwBoard){
+    public void updateDeviceInfo(final float X, final float Y, final float Z){
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mwBoard != null) {
-                    TextView tvBattery = (TextView) getView().findViewById(R.id.tvInfoBattery);
-                    tvBattery.setText("0");
+                TextView tvAccelX = (TextView) getView().findViewById(R.id.tvInfoAccelX);
+                tvAccelX.setText(Float.toString(X));
 
-                    TextView tvRSSI = (TextView) getView().findViewById(R.id.tvInfoSignal);
-                    tvRSSI.setText("0");
+                TextView tvAccelY = (TextView) getView().findViewById(R.id.tvInfoAccelY);
+                tvAccelY.setText(Float.toString(Y));
 
-                    TextView tvAccelX = (TextView) getView().findViewById(R.id.tvInfoAccelX);
-                    tvAccelX.setText ("1");
-
-                    TextView tvAccelY = (TextView) getView().findViewById(R.id.tvInfoAccelY);
-                    tvAccelY.setText ("2");
-
-                    TextView tvAccelZ = (TextView) getView().findViewById(R.id.tvInfoAccelZ);
-                    tvAccelZ.setText ("3");
-                }
+                TextView tvAccelZ = (TextView) getView().findViewById(R.id.tvInfoAccelZ);
+                tvAccelZ.setText(Float.toString(Z));
             }
         });
-
     }
 }
