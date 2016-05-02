@@ -35,8 +35,20 @@ public class MWInfoFragment extends Fragment {
             @Override
             public void run() {
                 if (mwBoard != null) {
-                    TextView tvMACAddress = (TextView) getView().findViewById(R.id.tvInfoMACAddress);
-                    tvMACAddress.setText(mwBoard.getMacAddress());
+                    TextView tvBattery = (TextView) getView().findViewById(R.id.tvInfoBattery);
+                    tvBattery.setText("0");
+
+                    TextView tvRSSI = (TextView) getView().findViewById(R.id.tvInfoSignal);
+                    tvRSSI.setText("0");
+
+                    TextView tvAccelX = (TextView) getView().findViewById(R.id.tvInfoAccelX);
+                    tvAccelX.setText ("1");
+
+                    TextView tvAccelY = (TextView) getView().findViewById(R.id.tvInfoAccelY);
+                    tvAccelY.setText ("2");
+
+                    TextView tvAccelZ = (TextView) getView().findViewById(R.id.tvInfoAccelZ);
+                    tvAccelZ.setText ("3");
                 }
             }
         });

@@ -169,15 +169,15 @@ public class SleepLogActivity extends AppCompatActivity {
                 layout.setVisibility(View.VISIBLE);
 
                 TextView tvTotalAwake = (TextView)findViewById(R.id.tvTotalAwake);
-                tvTotalAwake.setText("Total Time Awake: " + sleepLog.getTotalAwake());
+                tvTotalAwake.setText("Time Awake (mins): " + String.format("%.0f", (double)((double)sleepLog.getTotalAwake() / 1000) / 60));
                 tvTotalAwake.setVisibility(View.VISIBLE);
 
                 TextView tvTotalSleep = (TextView)findViewById(R.id.tvTotalSleep);
-                tvTotalSleep.setText("Total Time Asleep: " + sleepLog.getTotalAsleep());
+                tvTotalSleep.setText("Time Asleep (mins): " + String.format("%.0f", ((double)sleepLog.getTotalAsleep() / 1000) / 60));
                 tvTotalSleep.setVisibility(View.VISIBLE);
 
                 TextView tvTotalRestless = (TextView)findViewById(R.id.tvTotalRestless);
-                tvTotalRestless.setText("Total Time Restless: " + sleepLog.getTotalRestless());
+                tvTotalRestless.setText("Time Restless (mins): " + String.format("%.0f", ((double)sleepLog.getTotalRestless() / 1000) / 60));
                 tvTotalRestless.setVisibility(View.VISIBLE);
             }
         }

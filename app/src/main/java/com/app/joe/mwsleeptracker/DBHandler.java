@@ -15,7 +15,7 @@ import java.util.GregorianCalendar;
  * Created by jfran on 4/27/2016.
  */
 public class DBHandler extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "SleepHistory";
     private static final String TABLE_NAME = "sleephistory";
     private static final String COLUMN_NAME_ID = "id";
@@ -53,11 +53,51 @@ public class DBHandler extends SQLiteOpenHelper {
     public void addSleepHistory(SleepEntry sleepEntry) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-//        values.put(COLUMN_NAME_LOGDATETIME, Long.parseLong(dateFormat.format(sleepEntry.getLogDateTime().getTime())));
         values.put(COLUMN_NAME_LOGDATETIME, sleepEntry.getLogDateTime());
         values.put(COLUMN_NAME_SLEEPSTATE, sleepEntry.getSleepState());
         db.insert(TABLE_NAME, null, values);
         db.close();
+    }
+
+    public void createSampleData(){
+        //Used to create sample data for testing
+        SleepEntry sampleSleepEntry = new SleepEntry();
+        Calendar cal = new GregorianCalendar();
+
+        cal.set(2016, 3, 28, 22, 15, 12);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(0);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 28, 22, 30, 10);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(5);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 28, 23, 15, 10);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(10);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 29, 1, 50, 10);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(0);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 29, 2, 20, 5);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(5);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 29, 3, 00, 5);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(10);
+        addSleepHistory(sampleSleepEntry);
+
+        cal.set(2016, 3, 29, 6, 00, 5);
+        sampleSleepEntry.setLogDateTime(cal.getTimeInMillis());
+        sampleSleepEntry.setSleepState(0);
+        addSleepHistory(sampleSleepEntry);
     }
 
     public int getRecordCount() {
@@ -74,6 +114,9 @@ public class DBHandler extends SQLiteOpenHelper {
         SleepLog sleepLog = new SleepLog();
         int[] sleepState = null;
         Date[] sleepDate = null;
+        int totalAwake = 0;
+        int totalAsleep = 0;
+        int totalRestless = 0;
 
         String logQuery = "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + COLUMN_NAME_LOGDATETIME + " >= " + startDateTime + " AND " +
@@ -95,15 +138,32 @@ public class DBHandler extends SQLiteOpenHelper {
                 sleepState[x] = cursor.getInt(cursor.getColumnIndex(COLUMN_NAME_SLEEPSTATE));
 
                 //Get date time integer and convert it back to a date
-                long datetime = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_LOGDATETIME));
-                Calendar calendar = new GregorianCalendar();
-                calendar.setTimeInMillis(datetime);
+                long longDateTime = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_LOGDATETIME));
+                Calendar currCalendar = new GregorianCalendar();
+                currCalendar.setTimeInMillis(longDateTime);
 
-                sleepDate[x] = calendar.getTime();
+                sleepDate[x] = currCalendar.getTime();
 
                 if (x > 0){
-                    sleepState[x-1] = sleepState[x];
-                    sleepDate[x-1] = sleepDate[x-2];
+                    //put the sleep data into the array
+                    sleepState[x-1] = sleepState[x-2];
+                    sleepDate[x-1] = sleepDate[x];
+
+                    //update sleep status times
+                    Calendar prevCalendar = new GregorianCalendar();
+                    prevCalendar.setTime(sleepDate[x-2]);
+                    long longPrevDateTime = prevCalendar.getTimeInMillis();
+
+                    int timeSinceLastEntry = (int)(longDateTime - longPrevDateTime);
+
+                    switch (sleepState[x-1]){
+                        case 0: totalAwake += timeSinceLastEntry;
+                            break;
+                        case 5: totalRestless += timeSinceLastEntry;
+                            break;
+                        case 10: totalAsleep += timeSinceLastEntry;
+                            break;
+                    }
                 }
 
                 x+=2;
@@ -112,9 +172,9 @@ public class DBHandler extends SQLiteOpenHelper {
             sleepLog.setSleepStatus(sleepState);
             sleepLog.setSleepDate(sleepDate);
 
-            sleepLog.setTotalAsleep(0);
-            sleepLog.setTotalAwake(0);
-            sleepLog.setTotalRestless(0);
+            sleepLog.setTotalAsleep(totalAsleep);
+            sleepLog.setTotalAwake(totalAwake);
+            sleepLog.setTotalRestless(totalRestless);
         }
 
         cursor.close();

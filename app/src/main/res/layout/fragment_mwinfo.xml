@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/info_frag_header"
-        android:id="@+id/textView"
-        android:layout_marginTop="24dp"
+        android:id="@+id/tvHeader"
+        android:layout_marginTop="25dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
@@ -18,56 +18,96 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView"
-        android:layout_marginTop="24dp" />
+        android:text="Battery Level"
+        android:id="@+id/tvInfoBLLabel"
+        android:layout_below="@+id/tvHeader"
+        android:layout_marginTop="20dp"
+        android:layout_alignStart="@+id/tvHeader" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
-        android:id="@+id/textView3"
-        android:layout_below="@+id/textView2"
-        android:layout_alignStart="@+id/textView2" />
+        android:id="@+id/tvInfoBattery"
+        android:layout_alignTop="@+id/tvInfoBLLabel"
+        android:layout_alignStart="@+id/tvInfoSignal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="RRSI"
+        android:id="@+id/tvInfoSignalLabel"
+        android:layout_below="@+id/tvInfoBLLabel"
+        android:layout_alignStart="@+id/tvInfoBLLabel"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
-        android:id="@+id/textView4"
-        android:layout_below="@+id/textView3"
-        android:layout_alignStart="@+id/textView3" />
+        android:id="@+id/tvInfoSignal"
+        android:layout_alignTop="@+id/tvInfoSignalLabel"
+        android:layout_alignEnd="@+id/tvHeader" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="X: "
+        android:id="@+id/tvInfoAccelXLabel"
+        android:layout_marginTop="15dp"
+        android:layout_below="@+id/tvInfoSignalLabel"
+        android:layout_alignStart="@+id/tvInfoSignalLabel" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Y: "
+        android:id="@+id/tvInfoAccelYLabel"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/tvInfoAccelXLabel"
+        android:layout_alignStart="@+id/tvInfoAccelXLabel" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Z: "
+        android:id="@+id/tvInfoAccelZLabel"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/tvInfoAccelYLabel"
+        android:layout_alignStart="@+id/tvInfoAccelYLabel" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
-        android:id="@+id/tvInfoMACAddress"
-        android:layout_alignTop="@+id/textView2"
-        android:layout_alignEnd="@+id/textView"
-        android:layout_marginEnd="31dp" />
+        android:id="@+id/tvInfoAccelX"
+        android:layout_above="@+id/tvInfoAccelYLabel"
+        android:layout_toEndOf="@+id/tvInfoAccelXLabel" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
-        android:id="@+id/textView6"
-        android:layout_below="@+id/tvInfoMACAddress"
-        android:layout_alignEnd="@+id/tvInfoMACAddress" />
+        android:id="@+id/tvInfoAccelY"
+        android:layout_alignTop="@+id/tvInfoAccelYLabel"
+        android:layout_toEndOf="@+id/tvInfoAccelYLabel" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Medium Text"
-        android:id="@+id/textView7"
-        android:layout_below="@+id/textView6"
-        android:layout_alignStart="@+id/textView6" />
+        android:id="@+id/tvInfoAccelZ"
+        android:layout_alignBottom="@+id/tvInfoAccelZLabel"
+        android:layout_alignStart="@+id/tvInfoAccelX" />
+
 
 </RelativeLayout>

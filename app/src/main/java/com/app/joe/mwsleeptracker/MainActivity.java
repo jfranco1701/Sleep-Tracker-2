@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothManager;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private static final int DEVICE_CONNECTED = 1;
 
     private MetaWearBleService.LocalBinder serviceBinder;
-    private final String MW_MAC_ADDRESS= "D2:70:1B:23:EA:9E";
+//    private final String MW_MAC_ADDRESS= "D2:70:1B:23:EA:9E";
     private String deviceMACAddress = "";
     private MetaWearBoard mwBoard;
     private ProgressDialog connectDialog;
@@ -106,11 +107,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         deviceMACAddress = PrefManager.readMACAddress();
 
         updateStatusFragment();
+        hideInfoFragment();
 
-        DBHandler dbhandler = new DBHandler(MainActivity.this);
-        int test = dbhandler.getRecordCount();
-
-        Toast.makeText(MainActivity.this, String.valueOf(test), Toast.LENGTH_LONG).show();
+//        DBHandler dbhandler = new DBHandler(MainActivity.this);
+////        dbhandler.createSampleData();
+//        int test = dbhandler.getRecordCount();
+//
+//        Toast.makeText(MainActivity.this, String.valueOf(test), Toast.LENGTH_LONG).show();
     }
 
     private void updateStatusFragment(){
@@ -122,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     private void updateInfoFragment(){
         FragmentManager fm = getSupportFragmentManager();
-        MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentByTag("MWINFOFRAGMENT");
+        MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
         fragment.updateDeviceInfo(mwBoard);
     }
 
@@ -194,16 +197,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                 });
 
-//                //Load the information fragment
-//                FragmentManager fm = getSupportFragmentManager();
-//                FragmentTransaction ft = fm.beginTransaction();
-//                MWInfoFragment mwInfoFragment = new MWInfoFragment();
-//                ft.add(R.id.infofragment_container, mwInfoFragment, "MWINFOFRAGMENT");
-//                ft.commit();
-
+                showInfoFragment();
 
                 updateStatusFragment();
-//                updateInfoFragment();
+                updateInfoFragment();
 
                 Log.i("MainActivity", "Connected");
 
@@ -219,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 if (connectDialog.isShowing()) {
                     connectDialog.dismiss();
                 }
+
+                hideInfoFragment();
 
                 runOnUiThread(new Runnable(){
                     @Override
@@ -243,11 +242,29 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                 });
 
+                hideInfoFragment();
+
                 updateStatusFragment();
 
                 mwBoard.connect();
             }
         });
+    }
+
+    private void hideInfoFragment(){
+        FragmentManager fm = getSupportFragmentManager();
+        MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.hide(fragment);
+        ft.commit();
+    }
+
+    private void showInfoFragment(){
+        FragmentManager fm = getSupportFragmentManager();
+        MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.show(fragment);
+        ft.commit();
     }
 
     private void setConnectionSwitch(boolean isChecked){
@@ -326,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         final BluetoothManager btManager=
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         final BluetoothDevice remoteDevice=
-                btManager.getAdapter().getRemoteDevice(MW_MAC_ADDRESS);
+                btManager.getAdapter().getRemoteDevice(deviceMACAddress);
 
         // Create a MetaWear board object for the Bluetooth Device
         mwBoard= serviceBinder.getMetaWearBoard(remoteDevice);
@@ -345,17 +362,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         result.subscribe("motion", new RouteManager.MessageHandler() {
                             @Override
                             public void process(Message msg) {
-                                SleepEntry sleepEntry = new SleepEntry();
 
-                                Calendar calendar = msg.getTimestamp();
-                                sleepEntry.setLogDateTime(calendar.getTimeInMillis());
-
-
-
-                                sleepEntry.setSleepState(10);
-
-                                DBHandler dbhandler = new DBHandler(MainActivity.this);
-                                dbhandler.addSleepHistory(sleepEntry);
+                                //LOGING WOULD BE HERE
 
                                 Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }

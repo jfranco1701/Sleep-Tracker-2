@@ -35,13 +35,12 @@
         android:layout_alignParentEnd="true"
         android:layout_marginRight="40dp"/>
 
-    <LinearLayout
-        android:id="@+id/infofragment_container"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+    <fragment class="com.app.joe.mwsleeptracker.MWInfoFragment"
+        android:id="@+id/info_fragment"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="100dp"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/tvBoardStatus" />
+        android:layout_marginTop="40dp"
+        android:layout_alignLeft="@+id/tvSelectedLabel"
+        android:layout_below="@+id/status_fragment"/>
 
 </RelativeLayout>
