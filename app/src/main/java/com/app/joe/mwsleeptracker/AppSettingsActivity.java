@@ -14,10 +14,10 @@ import android.widget.TextView;
 
 public class AppSettingsActivity extends AppCompatActivity {
 
-    private SharedPreferences preferenceSettings;
-    private SharedPreferences.Editor preferenceEditor;
+//    private SharedPreferences preferenceSettings;
+//    private SharedPreferences.Editor preferenceEditor;
 
-    private static final int PREFERENCE_MODE_PRIVATE = 0;
+//    private static final int PREFERENCE_MODE_PRIVATE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +34,8 @@ public class AppSettingsActivity extends AppCompatActivity {
         btnSelectDevice.setOnClickListener(
                 new Button.OnClickListener() {
                     public void onClick(View v) {
-
-
                         Intent intent = new Intent(AppSettingsActivity.this, MWScanActivity.class);
                         startActivityForResult(intent, 1);
-
-
                     }
                 }
         );
@@ -61,7 +57,7 @@ public class AppSettingsActivity extends AppCompatActivity {
                 textViewSelectedDevice.setText("Selected Device: " + PrefManager.readMACAddress());
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
+
             }
         }
     }

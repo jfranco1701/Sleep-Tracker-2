@@ -23,7 +23,7 @@
     <string name="title_activity_mwscan">MWScanActivity</string>
     <string name="title_select_device">Select Device</string>
 
-    <string name="no_device_selected">No Device Selected</string>
+    <string name="no_device_selected">No Device Selected.\nPlease select from Settings.</string>
     <string name="device_status_connected">Connected</string>
     <string name="device_status_disconnected">Disconnected</string>
 

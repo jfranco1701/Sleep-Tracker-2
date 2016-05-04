@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -33,7 +34,10 @@
         android:switchMinWidth="60dp"
         android:layout_alignBottom="@+id/status_fragment"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="40dp"/>
+        android:layout_marginRight="40dp"
+        android:showText="false"
+        android:splitTrack="false"
+        android:singleLine="false" />
 
     <fragment class="com.app.joe.mwsleeptracker.MWInfoFragment"
         android:id="@+id/info_fragment"

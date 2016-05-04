@@ -2,10 +2,10 @@ package com.app.joe.mwsleeptracker;
 
 import android.app.ProgressDialog;
 import android.content.*;
-import android.database.sqlite.SQLiteDatabase;
+//import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.Snackbar;
+//import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -29,8 +29,8 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
+//import android.widget.Toast;
+//import android.widget.ToggleButton;
 
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.Message;
@@ -39,21 +39,21 @@ import com.mbientlab.metawear.MetaWearBoard;
 import com.mbientlab.metawear.RouteManager;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.data.CartesianFloat;
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.Bma255Accelerometer;
+//import com.mbientlab.metawear.module.Accelerometer;
+//import com.mbientlab.metawear.module.Bma255Accelerometer;
 import com.mbientlab.metawear.module.Bmi160Accelerometer;
-import com.mbientlab.metawear.module.Mma8452qAccelerometer;
+//import com.mbientlab.metawear.module.Mma8452qAccelerometer;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+//import java.util.Calendar;
+//import java.util.Date;
+//import java.util.GregorianCalendar;
 
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, NavigationView.OnNavigationItemSelectedListener  {
-    private static final int PREFERENCE_MODE_PRIVATE = 0;
-    private static final int NO_DEVICE_SELECTED = 99;
-    private static final int DEVICE_DISCONNECTED = 0;
-    private static final int DEVICE_CONNECTED = 1;
+//    private static final int PREFERENCE_MODE_PRIVATE = 0;
+//    private static final int NO_DEVICE_SELECTED = 99;
+//    private static final int DEVICE_DISCONNECTED = 0;
+//    private static final int DEVICE_CONNECTED = 1;
 
     private MetaWearBleService.LocalBinder serviceBinder;
 //    private final String MW_MAC_ADDRESS= "D2:70:1B:23:EA:9E";
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private MetaWearBoard mwBoard;
     private ProgressDialog connectDialog;
 
-    private boolean isAllowDisconnect = false;
+//    private boolean isAllowDisconnect = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,28 +85,41 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             navigationView.setNavigationItemSelectedListener(this);
         }
 
-        Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
-
-        if (switchConnection != null) {
-            switchConnection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        connectMWBoard();
-
-                    } else {
-                        disconnectMWBoard();
-                    }
-                }
-            });
-        }
-
-        getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
-
         PrefManager.Init(this);
         deviceMACAddress = PrefManager.readMACAddress();
 
-        updateStatusFragment();
+        if (deviceMACAddress == null || deviceMACAddress == ""){
+            Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
+            switchConnection.setVisibility(View.GONE);
+
+            TextView tvSelectedDevice = (TextView) findViewById(R.id.tvSelectedDevice);
+            tvSelectedDevice.setText(R.string.no_device_selected);
+
+            TextView tvBoardStatus = (TextView) findViewById(R.id.tvBoardStatus);
+            tvBoardStatus.setText("");
+        }
+        else{
+            Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
+            switchConnection.setVisibility(View.VISIBLE);
+
+            if (switchConnection != null) {
+                switchConnection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            connectMWBoard();
+
+                        } else {
+                            disconnectMWBoard();
+                        }
+                    }
+                });
+            }
+
+            getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
+            updateStatusFragment();
+        }
+
         hideInfoFragment();
 
 //        DBHandler dbhandler = new DBHandler(MainActivity.this);
@@ -173,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onDestroy() {
         super.onDestroy();
 
+        if (serviceBinder != null)
         // Unbind the service when the activity is destroyed
         getApplicationContext().unbindService(this);
     }
@@ -299,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     private void connectMWBoard(){
         //
-        isAllowDisconnect = false;
+//        isAllowDisconnect = false;
 
         //Open the connection dialog
         connectDialog = new ProgressDialog(MainActivity.this);
@@ -321,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void disconnectMWBoard(){
-        isAllowDisconnect = true;
+//        isAllowDisconnect = true;
 
 //        mwBoard.setConnectionStateHandler(null);
         mwBoard.disconnect();
@@ -366,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                                         msg.getData(CartesianFloat.class).y(),
                                         msg.getData(CartesianFloat.class).z());
 
-                                //LOGING WOULD BE HERE
+                                //CALL TO PHYSICS ENGINE WOULD BE HERE
 
                                 Log.i("MainActivity", msg.getData(CartesianFloat.class).toString());
                             }
