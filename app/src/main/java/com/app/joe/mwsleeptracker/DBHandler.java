@@ -12,9 +12,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
- * Created by jfran on 4/27/2016.
+ * Class DBHandler
+ *
+ * This class implements the SQLite library for the storage and retrieval of sleep data.
  */
 public class DBHandler extends SQLiteOpenHelper {
+    //Define the database
     private static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "SleepHistory";
     private static final String TABLE_NAME = "sleephistory";
@@ -22,20 +25,18 @@ public class DBHandler extends SQLiteOpenHelper {
     private static final String COLUMN_NAME_LOGDATETIME = "logdatetime";
     private static final String COLUMN_NAME_SLEEPSTATE = "sleepstate";
     public static final String DATE_FORMAT = "yyyyMMddHHmmss";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-    private static final int ASLEEP = 10;
-    private static final int RESTLESS = 5;
-    private static final int AWAKE = 0;
+//    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+//    private static final int ASLEEP = 10;
+//    private static final int RESTLESS = 5;
+//    private static final int AWAKE = 0;
 
     public DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-
-
     @Override
     public void onCreate(SQLiteDatabase db) {
+        //Create the table
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME + "("
                 + COLUMN_NAME_ID + " INTEGER PRIMARY KEY,"
                 + COLUMN_NAME_LOGDATETIME + " LONG,"
@@ -46,11 +47,13 @@ public class DBHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        // Creating tables again
+        // Recreate the table
         onCreate(db);
     }
 
     public void addSleepHistory(SleepEntry sleepEntry) {
+        //Insert a new sleeptracking record with values found in the
+        //sleepEntry object
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_LOGDATETIME, sleepEntry.getLogDateTime());
@@ -101,16 +104,19 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public int getRecordCount() {
+        //Return a count of all records in the table
         String countQuery = "SELECT * FROM " + TABLE_NAME;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count = cursor.getCount();
         cursor.close();
-        // return count
+        db.close();
         return count;
     }
 
     public SleepLog getSleepLog(long startDateTime, long endDateTime){
+        //Query the sleeptracker table for all records that have date/times
+        //between the start and end date/times given
         SleepLog sleepLog = new SleepLog();
         int[] sleepState = null;
         Date[] sleepDate = null;
@@ -125,12 +131,21 @@ public class DBHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(logQuery, null);
         int count = cursor.getCount();
 
+        //if there are sleep records returned
         if (count > 0){
+            //Create an array for the state states and the date/times
+            //The array needs to be made n*2-1 in size because additional
+            //entries need to be created for the graph to display properly
+            //Records from the result set will be entered in the even
+            //numbered array positions.  Odd number positions will be created based on the previous
+            //entries.  This allows the graph to display as a step type graph apposed to a
+            //standard line graph.
+
             sleepState = new int[count*2 - 1];
             sleepDate = new Date[count*2 - 1];
 
+            //Starting with the first record
             int x = 0;
-
             cursor.moveToFirst();
 
             do{
@@ -141,11 +156,13 @@ public class DBHandler extends SQLiteOpenHelper {
                 long longDateTime = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_LOGDATETIME));
                 Calendar currCalendar = new GregorianCalendar();
                 currCalendar.setTimeInMillis(longDateTime);
-
                 sleepDate[x] = currCalendar.getTime();
 
+                //if this is not the first data element added to the arrays
                 if (x > 0){
-                    //put the sleep data into the array
+                    //Create the entries that are stored in the odd numbered elements
+                    //Copy the sleep state from x-2 into x-1
+                    //Copy the current date/time in x into x-1
                     sleepState[x-1] = sleepState[x-2];
                     sleepDate[x-1] = sleepDate[x];
 
@@ -166,9 +183,12 @@ public class DBHandler extends SQLiteOpenHelper {
                     }
                 }
 
+                //Store next record from the result set into the even numbered array
+                //element
                 x+=2;
-            } while (cursor.moveToNext());
+            } while (cursor.moveToNext()); //go through each record until they are all read
 
+            //Populate the sleepLog object to be returned to the log activity
             sleepLog.setSleepStatus(sleepState);
             sleepLog.setSleepDate(sleepDate);
 
@@ -177,8 +197,9 @@ public class DBHandler extends SQLiteOpenHelper {
             sleepLog.setTotalRestless(totalRestless);
         }
 
+        //close the cursor used to read the records
         cursor.close();
-        // return count
+        db.close();
 
         return sleepLog;
     }

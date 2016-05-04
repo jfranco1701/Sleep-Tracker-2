@@ -12,7 +12,11 @@ import com.mbientlab.metawear.MetaWearBoard;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * MWStatus Fragment
+ *
+ * This fragment is used to display the current status of the MetaWear board
+ * If a board has not been selected in the settings activity, a message will be displayed
+ * that indicates that they must do so.
  */
 public class MWStatusFragment extends Fragment {
     public MWStatusFragment() {
@@ -31,9 +35,11 @@ public class MWStatusFragment extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                //Display the currently selected board MAC address
+
                 TextView tvSelectedDevice = (TextView) getView().findViewById(R.id.tvSelectedDevice);
 
+                //Display the currently selected board MAC address.  If one is not selected
+                //show a message indicating they must do so.
                 if (tvSelectedDevice != null) {
                     if (deviceMACAddress.equals("")) {
                         tvSelectedDevice.setText(R.string.no_device_selected);
@@ -42,6 +48,7 @@ public class MWStatusFragment extends Fragment {
                     }
                 }
 
+                //Display connection status.
                 TextView tvBoardStatus = (TextView) getView().findViewById(R.id.tvBoardStatus);
                 if (tvBoardStatus != null) {
                     if (mwBoard == null){

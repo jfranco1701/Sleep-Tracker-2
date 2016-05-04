@@ -14,6 +14,12 @@ import android.widget.TextView;
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.MetaWearBoard;
 
+/**
+ * MWInfoFragment
+ *
+ * This fragment is used to display the accelerometer data as it is received
+ * from the MetaWear board.
+ */
 
 public class MWInfoFragment extends Fragment {
 
@@ -27,11 +33,10 @@ public class MWInfoFragment extends Fragment {
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_mwinfo, container, false);
-
     }
 
     public void updateDeviceInfo(final float X, final float Y, final float Z){
-
+        //Update textviews with accel data
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

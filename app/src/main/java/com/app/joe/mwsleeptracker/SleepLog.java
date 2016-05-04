@@ -3,7 +3,10 @@ package com.app.joe.mwsleeptracker;
 import java.util.Date;
 
 /**
- * Created by jfran on 4/30/2016.
+ * Class SleepLog
+ *
+ * Class used to store the query results when viewing the sleep log
+ *
  */
 public class SleepLog {
     private int totalAwake;

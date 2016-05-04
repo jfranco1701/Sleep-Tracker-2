@@ -5,7 +5,10 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 
 /**
- * Created by jfran on 4/28/2016.
+ * Class SleepEntry
+ *
+ * Sleep data is entered into a instance of this class and is sent to the
+ * dbhandler to be inserted into the database
  */
 public class SleepEntry {
     private long id;

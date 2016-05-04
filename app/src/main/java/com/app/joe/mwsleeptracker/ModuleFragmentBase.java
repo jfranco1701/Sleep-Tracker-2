@@ -23,6 +23,14 @@ import com.mbientlab.metawear.UnsupportedModuleException;
 import java.io.InputStream;
 import java.util.Locale;
 
+/**
+ * Class ModuleFragmentBase
+ *
+ * Taken from MetaWear sample application
+ * Class used for MetaWear board operations
+ *
+ */
+
 public abstract class ModuleFragmentBase extends Fragment implements ServiceConnection {
     public interface FragmentBus {
         BluetoothDevice getBtDevice();

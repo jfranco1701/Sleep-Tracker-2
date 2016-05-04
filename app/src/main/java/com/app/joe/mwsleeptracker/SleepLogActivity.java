@@ -25,6 +25,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+/**
+ * SleepLogActivity
+ *
+ * This activity is used to view the sleep log.
+ * Selecting a date from the calendar picker will execute a SQL query that returns
+ * the sleep information for the date selected.  The sleep state transitions
+ * are shown on a graph at the bottom of the page.  The activity is started with
+ * the current date as a default value.
+ */
 public class SleepLogActivity extends AppCompatActivity {
 
     @Override
@@ -36,15 +45,18 @@ public class SleepLogActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //Set the date to the current date
+        //Set the current date as a default value
         TextView tvDate = (TextView) findViewById(R.id.tvDate);
         Date date = new Date();
         SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
         String formattedDate = df.format(date);
         tvDate.setText(formattedDate);
 
+        //Create a listener that will detect when the date value
+        //has been changed.
         tvDate.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
+                //Query the database and genereate the graph
                 generateGraph();
             }
 
@@ -57,6 +69,7 @@ public class SleepLogActivity extends AppCompatActivity {
             }
         });
 
+        //Query the selected date and display the graph
         generateGraph();
     }
 
@@ -75,6 +88,9 @@ public class SleepLogActivity extends AppCompatActivity {
             //Create the start and end dates for the search
             Date searchDate = (Date)df.parse(searchDateString);
 
+            //Starting with the 23:59 on the selected date
+            //Subtract 12 hours to create a start date/time
+            //Add 12 hours to create a end date/time
             calendarStart = Calendar.getInstance();
             calendarStart.setTime(searchDate);
             calendarStart.add(Calendar.HOUR_OF_DAY, -12);
@@ -87,6 +103,7 @@ public class SleepLogActivity extends AppCompatActivity {
 
         }
 
+        //If the dates have been successfully create then query the database
         if (calendarStart != null && calendarEnd != null){
             int[] sleepStatus = null;
             Date[] sleepDate = null;
@@ -98,6 +115,8 @@ public class SleepLogActivity extends AppCompatActivity {
             sleepStatus = sleepLog.getSleepStatus();
             sleepDate = sleepLog.getSleepDate();
 
+            //If there is no sleep data logged for the given date, display a message and
+            //hide the textviews and graph
             if (sleepStatus == null || sleepStatus.length < 1){
                 TextView tvTotalAsleep = (TextView)findViewById(R.id.tvTotalSleep);
                 tvTotalAsleep.setText("There is no log data for the date selected");
@@ -113,9 +132,10 @@ public class SleepLogActivity extends AppCompatActivity {
             }
             else
             {
-
+                //If there is data
                 int[] margins = {100, 150, 100, 25};
 
+                //Create the chart
                 GraphicalView mChart;
                 TimeSeries tsSleepQual = new TimeSeries("Sleep Quality");
 
@@ -164,10 +184,12 @@ public class SleepLogActivity extends AppCompatActivity {
 
                 mChart = ChartFactory.getTimeChartView(this, mDataset, mRenderer, "MM-dd HH:mm");
 
+                //Add the chart to the layout
                 LinearLayout layout = (LinearLayout) findViewById(R.id.chart);
                 layout.addView(mChart);
                 layout.setVisibility(View.VISIBLE);
 
+                //Update textviews
                 TextView tvTotalAwake = (TextView)findViewById(R.id.tvTotalAwake);
                 tvTotalAwake.setText("Time Awake (mins): " + String.format("%.0f", (double)((double)sleepLog.getTotalAwake() / 1000) / 60));
                 tvTotalAwake.setVisibility(View.VISIBLE);

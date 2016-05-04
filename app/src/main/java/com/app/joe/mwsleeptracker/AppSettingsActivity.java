@@ -12,12 +12,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * AppSettingsActivity
+ *
+ * This activity is displays the currently selected MetaWear board (if one is selected)
+ * and allows the user to select a different one.  This activity will call the MWScanActivity
+ * to retrieve the MAC of the MW board.
+ * The selected board MAC is written as a shared preference.
+ */
+
 public class AppSettingsActivity extends AppCompatActivity {
-
-//    private SharedPreferences preferenceSettings;
-//    private SharedPreferences.Editor preferenceEditor;
-
-//    private static final int PREFERENCE_MODE_PRIVATE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,7 @@ public class AppSettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        //Send back MAC when Activity is closed.
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
                 String mac=data.getStringExtra("MAC");

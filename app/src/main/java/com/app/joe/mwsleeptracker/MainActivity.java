@@ -42,26 +42,22 @@ import com.mbientlab.metawear.data.CartesianFloat;
 //import com.mbientlab.metawear.module.Accelerometer;
 //import com.mbientlab.metawear.module.Bma255Accelerometer;
 import com.mbientlab.metawear.module.Bmi160Accelerometer;
-//import com.mbientlab.metawear.module.Mma8452qAccelerometer;
 
-//import java.util.Calendar;
-//import java.util.Date;
-//import java.util.GregorianCalendar;
-
+/**
+ * MainActivity
+ *
+ * This is the activity that is started when the application is run.  It creates the navagation view
+ * and displays the status and info fragments.
+ *
+ *
+ */
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, NavigationView.OnNavigationItemSelectedListener  {
-//    private static final int PREFERENCE_MODE_PRIVATE = 0;
-//    private static final int NO_DEVICE_SELECTED = 99;
-//    private static final int DEVICE_DISCONNECTED = 0;
-//    private static final int DEVICE_CONNECTED = 1;
 
     private MetaWearBleService.LocalBinder serviceBinder;
-//    private final String MW_MAC_ADDRESS= "D2:70:1B:23:EA:9E";
     private String deviceMACAddress = "";
     private MetaWearBoard mwBoard;
     private ProgressDialog connectDialog;
-
-//    private boolean isAllowDisconnect = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Setup navagtion drawer
+        //Setup navigation drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -85,9 +81,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             navigationView.setNavigationItemSelectedListener(this);
         }
 
+        //Read the selected MW board MAC
         PrefManager.Init(this);
         deviceMACAddress = PrefManager.readMACAddress();
 
+        //If one has not been selected, Hide the connection switch and show that no
+        //device has been selected
         if (deviceMACAddress == null || deviceMACAddress == ""){
             Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
             switchConnection.setVisibility(View.GONE);
@@ -99,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             tvBoardStatus.setText("");
         }
         else{
+            //Otherwise, display the switch and create a listner that will detect when the
+            //switch has changed states
             Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
             switchConnection.setVisibility(View.VISIBLE);
 
@@ -107,29 +108,33 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
+                            //If the switch is on, then connect the MW board
                             connectMWBoard();
 
                         } else {
+                            //If the switch is off, disconnect the MW board
                             disconnectMWBoard();
                         }
                     }
                 });
             }
 
+            //Bind the MW bluetooth serveice and update that status fragment.
             getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
             updateStatusFragment();
         }
 
+        //Hide the info fragment until the MW board has been connected.
         hideInfoFragment();
 
-//        DBHandler dbhandler = new DBHandler(MainActivity.this);
-////        dbhandler.createSampleData();
-//        int test = dbhandler.getRecordCount();
-//
-//        Toast.makeText(MainActivity.this, String.valueOf(test), Toast.LENGTH_LONG).show();
+        //Create test entries in the database
+/*        DBHandler dbhandler = new DBHandler(MainActivity.this);
+        dbhandler.createSampleData();
+        int test = dbhandler.getRecordCount();*/
     }
 
     private void updateStatusFragment(){
+        //Calls method in status fragment to update the status
         FragmentManager fm = getSupportFragmentManager();
         MWStatusFragment fragment = (MWStatusFragment) fm.findFragmentById(R.id.status_fragment);
         fragment.updateStatusInfo(mwBoard, deviceMACAddress);
@@ -137,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 
     private void updateInfoFragment(float X, float Y, float Z){
+        //Calls method in info fragment to update the display of accel info
         FragmentManager fm = getSupportFragmentManager();
         MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
         fragment.updateDeviceInfo(X, Y, Z);
@@ -196,8 +202,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // Typecast the binder to the service's LocalBinder class
         serviceBinder = (MetaWearBleService.LocalBinder) service;
 
+        //Retrieve the board information
         retrieveBoard();
 
+        //Create a state handler that will
         mwBoard.setConnectionStateHandler(new MetaWearBoard.ConnectionStateHandler() {
             @Override
             public void connected() {
@@ -265,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void hideInfoFragment(){
+        //Hide the info fragment shown on this activity
         FragmentManager fm = getSupportFragmentManager();
         MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
         FragmentTransaction ft = fm.beginTransaction();
@@ -273,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void showInfoFragment(){
+        //Show the info fragment shown on this activity
         FragmentManager fm = getSupportFragmentManager();
         MWInfoFragment fragment = (MWInfoFragment) fm.findFragmentById(R.id.info_fragment);
         FragmentTransaction ft = fm.beginTransaction();
@@ -281,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void setConnectionSwitch(boolean isChecked){
+        //Change the switch state based on the input parameter
         Switch switchConnection = (Switch) findViewById(R.id.switchConnection);
 
         if(switchConnection != null) {
@@ -289,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void unsupportedModule() {
+        //Display an alert of the module is not supported by the MW board
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
         alertDialogBuilder.setTitle(R.string.title_error);
@@ -312,9 +324,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void connectMWBoard(){
-        //
-//        isAllowDisconnect = false;
-
         //Open the connection dialog
         connectDialog = new ProgressDialog(MainActivity.this);
         connectDialog.setTitle(getString(R.string.title_connecting));
@@ -335,21 +344,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void disconnectMWBoard(){
-//        isAllowDisconnect = true;
-
-//        mwBoard.setConnectionStateHandler(null);
         mwBoard.disconnect();
 
-        //Remove the information fragment
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag("MWINFOFRAGMENT");
-        if(fragment != null){
-            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-        }
+        hideInfoFragment();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-
     }
 
     public void retrieveBoard() {
@@ -367,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         bmi160AccModule.setOutputDataRate(2.f);
         bmi160AccModule.setAxisSamplingRange(3.0f);
 
-// Route data from the chip's motion detector
+        // Route data from the chip's motion detector
         bmi160AccModule.routeData().fromAxes().stream("motion").commit()
                 .onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                     @Override

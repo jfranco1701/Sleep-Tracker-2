@@ -30,5 +30,8 @@
     <string name="title_activity_about">About Sleep Tracker</string>
     <string name="title_activity_sleep_log">Sleep Tracker Log</string>
     <string name="title_activity_app_settings">Sleep Tracker Settings</string>
+    <string name="about_sleep_tracker">Sleep Tracker</string>
+    <string name="about_icon_license">Icon made by Freepik from www.flaticon.com\nLicensed by CC 3.0 BY</string>
+    <string name="about_metawear">MeataWear \u00A9 MbientLab Inc.</string>
 
 </resources>

@@ -19,6 +19,12 @@ package com.app.joe.mwsleeptracker;
 
         import java.util.UUID;
 
+/**
+ * MWScanActivity
+ *
+ * This activity is used to scan for Metawear boards and allows the user to select one to use
+ * in for the application.  If a device is selected, it's MAC is returned to the Settings activity
+ */
 
 public class MWScanActivity extends AppCompatActivity implements ScannerCommunicationBus, ServiceConnection {
     private final static UUID[] serviceUuids;
@@ -39,6 +45,7 @@ public class MWScanActivity extends AppCompatActivity implements ScannerCommunic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mwscan);
 
+        //Bind MetaWear bluetooth service
         getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), this, BIND_AUTO_CREATE);
     }
 
@@ -46,7 +53,7 @@ public class MWScanActivity extends AppCompatActivity implements ScannerCommunic
     public void onDestroy() {
         super.onDestroy();
 
-        ///< Unbind the service when the activity is destroyed
+        //Unbind the service when the activity is destroyed
         getApplicationContext().unbindService(this);
     }
 
@@ -54,6 +61,7 @@ public class MWScanActivity extends AppCompatActivity implements ScannerCommunic
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case REQUEST_START_APP:
+                //Start the MetaWear scanner fragment
                 ((BleScannerFragment) getFragmentManager().findFragmentById(R.id.scanner_fragment)).startBleScan();
                 break;
         }
@@ -62,6 +70,7 @@ public class MWScanActivity extends AppCompatActivity implements ScannerCommunic
 
     @Override
     public void onDeviceSelected(final BluetoothDevice btDevice) {
+        //When a device is select, read it's MAC and return it to the calling activity
         mwBoard= serviceBinder.getMetaWearBoard(btDevice);
         String strMAC = mwBoard.getMacAddress();
 

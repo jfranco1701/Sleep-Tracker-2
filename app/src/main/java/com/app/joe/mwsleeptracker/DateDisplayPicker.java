@@ -10,7 +10,9 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 /**
- * From blog by Nick Rubino
+ * Class DateDisplayPicker
+ *
+ * Taken from blog by Nick Rubino
  * https://blog.tallan.com/2013/02/18/android-date-time-picker-dialog/
  */
 public class DateDisplayPicker extends TextView implements DatePickerDialog.OnDateSetListener{
