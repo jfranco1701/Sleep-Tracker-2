@@ -16,4 +16,4 @@ The following will need to be installed in order to build the application.
 * Open the application using Android Studio.
 * Select Build APK from the Build Menu.
 * Copy the APK file from your computer to the Android device.
-* Install the APK file (will have to allow installation of applications not download from the Android Market).
+* Install the APK file (will have to allow installation of applications not downloaded from the Android Market).
